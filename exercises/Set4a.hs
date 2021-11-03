@@ -122,8 +122,9 @@ longest ls = foldr com (head ls) ls
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k,v)] -> [(k,v)]
-incrementKey = todo
+incrementKey :: (Num v, Eq k) => k -> [(k,v)] -> [(k,v)]
+incrementKey key [] = []
+incrementKey key ((k, v):xs)= (if key == k then (k, v+1) else (k, v)) : incrementKey key xs
 
 ------------------------------------------------------------------------------
 -- Ex 7: compute the average of a list of values of the Fractional
