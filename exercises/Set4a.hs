@@ -35,7 +35,9 @@ import Data.Array
 -- you remove the Eq a => constraint from the type!
 
 allEqual :: Eq a => [a] -> Bool
-allEqual xs = todo
+allEqual xs = case xs of [] -> True
+                         [x] -> True
+                         (x:ys) -> x `elem` ys && allEqual ys
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
@@ -50,7 +52,8 @@ allEqual xs = todo
 --   distinct [1,2] ==> True
 
 distinct :: Eq a => [a] -> Bool
-distinct = todo
+distinct xs = case xs of [] -> True
+                         (x:xs) -> x `notElem` xs && distinct xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the function middle that returns the middle value
@@ -62,8 +65,8 @@ distinct = todo
 -- Examples:
 --   middle 'b' 'a' 'c'  ==> 'b'
 --   middle 1 7 3        ==> 3
-
-middle = todo
+middle :: Ord a => a -> a ->a -> a
+middle x y z = sort [x, y, z] !! 1
 
 ------------------------------------------------------------------------------
 -- Ex 4: return the range of an input list, that is, the difference
@@ -78,8 +81,10 @@ middle = todo
 --   rangeOf [4,2,1,3]          ==> 3
 --   rangeOf [1.5,1.0,1.1,1.2]  ==> 0.5
 
-rangeOf :: [a] -> a
-rangeOf = todo
+rangeOf :: (Num a, Ord a) => [a] -> a
+rangeOf xs = head rsxs - head sxs
+    where sxs = sort xs
+          rsxs = reverse sxs
 
 ------------------------------------------------------------------------------
 -- Ex 5: given a (non-empty) list of (non-empty) lists, return the longest
@@ -97,7 +102,11 @@ rangeOf = todo
 --   longest [[1,2,3],[4,5],[6]] ==> [1,2,3]
 --   longest ["bcd","def","ab"] ==> "bcd"
 
-longest = todo
+longest :: Ord a => [[a]] -> [a]
+longest ls = foldr com (head ls) ls
+        where com x y = case compare (length x) (length y) of LT -> y
+                                                              GT -> x
+                                                              EQ -> if head x > head y then y else x
 
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
