@@ -1,10 +1,2 @@
-import Data.Map as Map
-import Data.Array
-withdraw account amount bank = 
-    case Map.lookup account bank of
-        Nothing -> bank
-        Just sum -> Map.insert account (sum - amount) bank
-
-myArray :: Array Bool String 
-myArray = array (True, False) [(True, "t"), (False , "f")]
-
+toDistinct xs = foldr f [] xs
+    where f x ys = if x `elem` ys then ys else x : ys 

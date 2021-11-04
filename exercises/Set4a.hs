@@ -139,7 +139,7 @@ incrementKey key ((k, v):xs)= (if key == k then (k, v+1) else (k, v)) : incremen
 -- length to a Fractional
 
 average :: Fractional a => [a] -> a
-average xs = todo
+average xs = sum xs / fromIntegral (length xs)
 
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
@@ -158,7 +158,11 @@ average xs = todo
 --     ==> "Lisa"
 
 winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
+winner scores player1 player2 = case compare (retrieveScore player1) (retrieveScore player2) of EQ -> player1
+                                                                                                GT -> player1
+                                                                                                LT -> player2
+    where retrieveScore name = case Map.lookup name scores of Nothing -> 0
+                                                              (Just a) -> a
 
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
@@ -173,8 +177,24 @@ winner scores player1 player2 = todo
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs xs = let dxs = toDistinct xs
+               m = distToMap dxs
+            in iterList dxs m xs
+iterList :: (Ord a1, Num a2) => [a1] -> Map.Map a1 a2 -> [a1] -> Map.Map a1 a2
+iterList dxs m xs = case dxs of [] -> m
+                                (x:as) -> iterList as (updateMap m x (countFreq x xs)) xs
 
+
+toDistinct xs = foldr f [] xs
+    where f x ys = if x `elem` ys then ys else x : ys
+
+distToMap xs = Map.fromList $ zip xs (repeat 1)
+
+countFreq key xs = foldr f 0 xs
+    where f x y = if x == key then y + 1 else y
+
+updateMap m k v = Map.alter f k m
+    where f _ = Just v
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
 -- similar function, transfer, that transfers money from one account
@@ -201,8 +221,14 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
-
+transfer from to amount bank = if checkAccount && checkAmount then trans else bank
+        where checkAccount = Map.member from bank && Map.member to bank
+              checkAmount = amount >= 0 && Map.findWithDefault 0 from bank >= amount
+              minusAmount x = case x of Nothing -> Nothing
+                                        (Just a) -> Just (a - amount)
+              addAmount x = case x of Nothing -> Nothing
+                                      (Just a) -> Just (a + amount)
+              trans = Map.alter addAmount to (Map.alter minusAmount from bank )
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
 --
@@ -211,7 +237,7 @@ transfer from to amount bank = todo
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
 swap :: Ix i => i -> i -> Array i a -> Array i a
-swap i j arr = todo
+swap i j arr = arr // [(i, arr ! j), (j, arr ! i)]
 
 ------------------------------------------------------------------------------
 -- Ex 12: given an Array, find the index of the largest element. You
@@ -222,4 +248,4 @@ swap i j arr = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex arr = fst (minimumBy (flip (comparing snd)) (Data.Array.assocs arr))
