@@ -48,7 +48,7 @@ twoBananas = MkShoppingEntry "Banana" 1.1 2
 --   totalPrice twoBananas   ==> 2.2
 
 totalPrice :: ShoppingEntry -> Double
-totalPrice (MkShoppingEntry _ price count)= price * fromIntegral count  
+totalPrice (MkShoppingEntry _ price count)= price * fromIntegral count
 
 -- buyOneMore should increment the count in an entry by one
 --
@@ -113,11 +113,11 @@ getY = y
 
 -- up increases the y value of a position by one
 up :: Position -> Position
-up p = Position (x p) (1 + y p) 
+up p = Position (x p) (1 + y p)
 
 -- right increases the x value of a position by one
 right :: Position -> Position
-right p = Position (1 + x p) (y p) 
+right p = Position (1 + x p) (y p)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Here's a datatype that represents a student. A student can
@@ -208,7 +208,7 @@ rgb col = case col of Red -> [1, 0, 0]
                       Green -> [0, 1, 0]
                       Blue -> [0, 0, 1]
                       (Mix c0 c1) ->  map ( / 2) (vectorPlus (rgb c0) (rgb c1))
-                      (Invert c) -> map (1 - ) (rgb c) 
+                      (Invert c) -> map (1 - ) (rgb c)
 vectorPlus [] [] = []
 vectorPlus xs [] = xs
 vectorPlus [] ys = ys
@@ -220,7 +220,7 @@ vectorPlus (x:xs) (y:ys) = (x + y) : vectorPlus xs ys
 -- Examples:
 --   One True         ::  OneOrTwo Bool
 --   Two "cat" "dog"  ::  OneOrTwo String
-
+data OneOrTwo b = One b | Two b b
 
 ------------------------------------------------------------------------------
 -- Ex 10: define a recursive datatype KeyVals for storing a set of
@@ -241,14 +241,16 @@ vectorPlus (x:xs) (y:ys) = (x + y) : vectorPlus xs ys
 -- Also define the functions toList and fromList that convert between
 -- KeyVals and lists of pairs.
 
-data KeyVals k v = KeyValsUndefined
+data KeyVals k v = Empty | Pair k v (KeyVals k v)
   deriving Show
 
 toList :: KeyVals k v -> [(k,v)]
-toList = todo
+toList Empty = []
+toList (Pair k v rst) = (k, v) : toList rst
 
 fromList :: [(k,v)] -> KeyVals k v
-fromList = todo
+fromList [] = Empty
+fromList ((k, v): rst) = Pair k v (fromList rst)
 
 ------------------------------------------------------------------------------
 -- Ex 11: The data type Nat is the so called Peano
@@ -265,10 +267,15 @@ data Nat = Zero | PlusOne Nat
   deriving (Show,Eq)
 
 fromNat :: Nat -> Int
-fromNat n = todo
+fromNat Zero = 0
+fromNat (PlusOne a) = 1 + fromNat a
 
 toNat :: Int -> Maybe Nat
-toNat z = todo
+toNat z
+  | z < 0 = Nothing
+  | z == 0 = Just Zero
+  | otherwise  = case toNat (z - 1) of Nothing -> Nothing
+                                       (Just a) -> Just (PlusOne a)
 
 ------------------------------------------------------------------------------
 -- Ex 12: While pleasingly simple in its definition, the Nat datatype is not
@@ -328,10 +335,19 @@ inc (O b) = I b
 inc (I b) = O (inc b)
 
 prettyPrint :: Bin -> String
-prettyPrint = todo
+prettyPrint End = ""
+prettyPrint (I b) = prettyPrint b ++ "1"
+prettyPrint (O b) = prettyPrint b ++ "0"
 
 fromBin :: Bin -> Int
-fromBin = todo
+fromBin = iter 0
+  where iter level b = case b of End -> 0
+                                 (I b) -> 2^level + iter (level + 1) b
+                                 (O b) -> iter (level + 1) b
+
 
 toBin :: Int -> Bin
-toBin = todo
+toBin b
+  | b <= 0 = O End
+  | b == 1 = I End
+  | otherwise = (if even b then O else I) $ toBin (b `div` 2)
