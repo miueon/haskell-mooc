@@ -22,6 +22,7 @@ import Mooc.Todo
 -- values 1 and 2, respectively.
 one :: Int
 one = 1
+
 two :: Int
 two = 2
 
@@ -75,7 +76,8 @@ checkPassword password =
   if password `elem` passwords
     then "You're in."
     else "ACCESS DENIED!"
-    where passwords = ["swordfish", "mellon"]
+  where
+    passwords = ["swordfish", "mellon"]
 
 ------------------------------------------------------------------------------
 -- Ex 7: A postal service prices packages the following way.
@@ -100,9 +102,9 @@ postagePrice x
 --
 -- Ps. remember, the type of booleans in haskell is Bool
 isZero :: Integer -> Bool
-isZero x 
-    | x == 0 = True 
-    | otherwise = False
+isZero x
+  | x == 0 = True
+  | otherwise = False
 
 ------------------------------------------------------------------------------
 -- Ex 9: implement using recursion a function sumTo such that
@@ -111,15 +113,15 @@ isZero x
 
 sumTo :: Integer -> Integer
 sumTo x
-    | x == 0 = 0
-    | otherwise = x + sumTo(x - 1)
+  | x == 0 = 0
+  | otherwise = x + sumTo (x - 1)
 
 ------------------------------------------------------------------------------
 -- Ex 10: power n k should compute n to the power k (i.e. n^k)
 -- Use recursion.
 
 power :: Integer -> Integer -> Integer
-power n k = n^k
+power n k = n ^ k
 
 ------------------------------------------------------------------------------
 -- Ex 11: ilog3 n should be the number of times you can divide given
@@ -138,7 +140,8 @@ power n k = n^k
 --   ilog3 7 ==> 2
 
 ilog3 :: Integer -> Integer
-ilog3 n = let div3 n = n `div` 3
-          in if div3 n == 0 
-              then 1 
-              else 1 + ilog3 (div3 n)
+ilog3 n =
+  let div3 n = n `div` 3
+   in if div3 n == 0
+        then 1
+        else 1 + ilog3 (div3 n)
