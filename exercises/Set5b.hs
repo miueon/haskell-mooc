@@ -2,9 +2,9 @@
 
 module Set5b where
 
+import Control.Applicative
 import Data.Maybe (isJust)
 import Mooc.Todo
-import Control.Applicative
 
 -- The next exercises use the binary tree type defined like this:
 
@@ -170,13 +170,14 @@ cull val tree = case tree of
 isOrdered :: Ord a => Tree a -> Bool
 isOrdered Empty = True
 isOrdered (Node a l r) =
-  treeCmp (<a) (const True) l &&
-  treeCmp (>a) (const True) r
-  where treeCmp lt gt Empty = True
-        treeCmp lt gt (Node a l r) =
-          lt a && gt a &&
-          treeCmp (<a) lt l &&
-          treeCmp (>a) gt r
+  treeCmp (< a) (const True) l
+    && treeCmp (> a) (const True) r
+  where
+    treeCmp lt gt Empty = True
+    treeCmp lt gt (Node a l r) =
+      lt a && gt a
+        && treeCmp (< a) lt l
+        && treeCmp (> a) gt r
 
 -- isOrdered tree = isJust $ inOrderMax tree Nothing
 --   where
@@ -187,7 +188,6 @@ isOrdered (Node a l r) =
 --        in case ordered l of
 --             Just True -> inOrderMax r (Just a)
 --             otherwise -> Nothing
-
 
 ------------------------------------------------------------------------------
 -- Ex 8: a path in a tree can be represented as a list of steps that
@@ -206,14 +206,17 @@ data Step = StepL | StepR
 --   walk [StepL,StepL] (Node 1 (Node 2 Empty Empty) Empty)  ==>  Nothing
 
 walk :: [Step] -> Tree a -> Maybe a
-walk [] tree = 
-  case tree of Empty -> Nothing 
-               (Node a _ _) -> Just a
-walk (step: rs) tree = 
-  case tree of Empty -> Nothing 
-               (Node a l r) -> 
-                 case step of StepL -> walk rs l
-                              StepR -> walk rs r
+walk [] tree =
+  case tree of
+    Empty -> Nothing
+    (Node a _ _) -> Just a
+walk (step : rs) tree =
+  case tree of
+    Empty -> Nothing
+    (Node a l r) ->
+      case step of
+        StepL -> walk rs l
+        StepR -> walk rs r
 
 ------------------------------------------------------------------------------
 -- Ex 9: given a tree, a path and a value, set the value at the end of
@@ -234,14 +237,18 @@ walk (step: rs) tree =
 --   set [StepL,StepR] 1 (Node 0 Empty Empty)  ==>  (Node 0 Empty Empty)
 
 set :: [Step] -> a -> Tree a -> Tree a
-set [] val tree = 
-  case tree of Empty -> Empty
-               (Node a l r) -> Node val l r
-set (step: rs) val tree = 
-  case tree of Empty -> Empty
-               (Node a l r) -> 
-                 case step of StepL -> Node a (set rs val l) r
-                              StepR -> Node a l (set rs val r)
+set [] val tree =
+  case tree of
+    Empty -> Empty
+    (Node a l r) -> Node val l r
+set (step : rs) val tree =
+  case tree of
+    Empty -> Empty
+    (Node a l r) ->
+      case step of
+        StepL -> Node a (set rs val l) r
+        StepR -> Node a l (set rs val r)
+
 ------------------------------------------------------------------------------
 -- Ex 10: given a value and a tree, return a path that goes from the
 -- root to the value. If the value doesn't exist in the tree, return Nothing.
@@ -256,10 +263,14 @@ set (step: rs) val tree =
 --                    (Node 5 Empty Empty))                     ==>  Just [StepL,StepR]
 
 search :: Eq a => a -> Tree a -> Maybe [Step]
-search val tree = 
-  case tree of Empty -> Nothing
-               (Node a l r) -> if a == val then Just [] else 
-                 case search val l of Nothing -> case search val r of Nothing -> Nothing 
-                                                                      (Just s) -> Just (StepR : s)
-                                      (Just s) -> Just (StepL : s)
-               
+search val tree =
+  case tree of
+    Empty -> Nothing
+    (Node a l r) ->
+      if a == val
+        then Just []
+        else case search val l of
+          Nothing -> case search val r of
+            Nothing -> Nothing
+            (Just s) -> Just (StepR : s)
+          (Just s) -> Just (StepL : s)
